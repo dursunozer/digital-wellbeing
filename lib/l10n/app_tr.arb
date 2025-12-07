@@ -1,0 +1,39 @@
+{
+  "appTitle": "Dijital Sağlık",
+  "totalScreenTime": "Bugünkü Toplam Ekran Süresi",
+  "last24Hours": "Son 24 saat",
+  "topApps": "En Çok Kullanılan 5 Uygulama",
+  "allApps": "Tüm Uygulamalar ({count})",
+  "@allApps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permissionRequired": "İzin Gerekli",
+  "permissionMessage": "Uygulama kullanımınızı takip etmek için kullanım istatistiklerine erişim iznine ihtiyacımız var. Bu, Ayarlar'da manuel olarak etkinleştirilmesi gereken özel bir Android iznidir.",
+  "grantPermission": "İzin Ver",
+  "whyPermission": "Neden bu izne ihtiyacımız var?",
+  "trackUsage": "Kullanımı Takip Et",
+  "trackUsageDesc": "Her uygulamada ne kadar zaman harcadığınızı izleyin",
+  "gainInsights": "İçgörü Kazanın",
+  "gainInsightsDesc": "Dijital alışkanlıklarınızı ve kalıplarınızı anlayın",
+  "reduceScreenTime": "Ekran Süresini Azaltın",
+  "reduceScreenTimeDesc": "Uygulama kullanımınız hakkında bilinçli kararlar alın",
+  "privacyNote": "Verileriniz cihazınızda kalır ve asla paylaşılmaz",
+  "noDataAvailable": "Uygulama kullanım verisi mevcut değil",
+  "startUsingApps": "İstatistikleri görmek için uygulamaları kullanmaya başlayın",
+  "loadingData": "Kullanım verileri yükleniyor...",
+  "errorLoadingData": "Veri yükleme hatası",
+  "retry": "Tekrar Dene",
+  "timeUnitHours": "sa",
+  "timeUnitMinutes": "dk",
+  "timeUnitSeconds": "sn",
+  "resetUsage": "Kullanımı Sıfırla",
+  "resetConfirmTitle": "Kullanım İstatistikleri Sıfırlansın mı?",
+  "resetConfirmMessage": "Bu işlem mevcut kullanım verilerini temizleyip yeni istatistikler alacak.",
+  "cancel": "İptal",
+  "reset": "Sıfırla",
+  "resetInProgress": "Kullanım verileri sıfırlanıyor..."
+}

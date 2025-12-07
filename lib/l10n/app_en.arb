@@ -1,0 +1,39 @@
+{
+  "appTitle": "Digital Wellbeing",
+  "totalScreenTime": "Total Screen Time Today",
+  "last24Hours": "Last 24 hours",
+  "topApps": "Top 5 Most Used Apps",
+  "allApps": "All Apps ({count})",
+  "@allApps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permissionRequired": "Permission Required",
+  "permissionMessage": "To track your app usage, we need permission to access usage statistics. This is a special Android permission that requires manual activation in Settings.",
+  "grantPermission": "Grant Permission",
+  "whyPermission": "Why do we need this permission?",
+  "trackUsage": "Track Usage",
+  "trackUsageDesc": "Monitor how much time you spend on each app",
+  "gainInsights": "Gain Insights",
+  "gainInsightsDesc": "Understand your digital habits and patterns",
+  "reduceScreenTime": "Reduce Screen Time",
+  "reduceScreenTimeDesc": "Make informed decisions about your app usage",
+  "privacyNote": "Your data stays on your device and is never shared",
+  "noDataAvailable": "No app usage data available",
+  "startUsingApps": "Start using apps to see statistics",
+  "loadingData": "Loading usage data...",
+  "errorLoadingData": "Error loading usage data",
+  "retry": "Retry",
+  "timeUnitHours": "h",
+  "timeUnitMinutes": "m",
+  "timeUnitSeconds": "s",
+  "resetUsage": "Reset Usage",
+  "resetConfirmTitle": "Reset Usage Statistics?",
+  "resetConfirmMessage": "This will clear all current usage data and fetch fresh statistics.",
+  "cancel": "Cancel",
+  "reset": "Reset",
+  "resetInProgress": "Resetting usage data..."
+}
