@@ -50,9 +50,10 @@ class _UsageChartWidgetState extends State<UsageChartWidget> {
       );
     }
 
-    final totalMinutes = widget.apps.fold<double>(
+    // Use seconds for more accurate calculation (avoids 0 when usage < 1 minute)
+    final totalSeconds = widget.apps.fold<double>(
       0,
-      (sum, app) => sum + app.usageDuration.inMinutes,
+      (sum, app) => sum + app.usageDuration.inSeconds,
     );
 
     final totalDuration = widget.apps.fold<Duration>(
@@ -85,7 +86,7 @@ class _UsageChartWidgetState extends State<UsageChartWidget> {
                 borderData: FlBorderData(show: false),
                 sectionsSpace: 2,
                 centerSpaceRadius: 65,
-                sections: _getSections(totalMinutes, isDark, l10n),
+                sections: _getSections(totalSeconds, isDark, l10n),
               ),
             ),
             Center(
@@ -128,7 +129,7 @@ class _UsageChartWidgetState extends State<UsageChartWidget> {
     );
   }
 
-  List<PieChartSectionData> _getSections(double totalMinutes, bool isDark, AppLocalizations l10n) {
+  List<PieChartSectionData> _getSections(double totalSeconds, bool isDark, AppLocalizations l10n) {
     final colors = [
       const Color(0xFF2196F3), 
       const Color(0xFF00BCD4), 
@@ -144,8 +145,9 @@ class _UsageChartWidgetState extends State<UsageChartWidget> {
       final fontSize = isTouched ? 16.0 : 14.0;
       final radius = isTouched ? 62.0 : 52.0;
       
-      final percentage = totalMinutes > 0
-          ? (app.usageDuration.inMinutes / totalMinutes) * 100
+      // Use seconds for percentage calculation
+      final percentage = totalSeconds > 0
+          ? (app.usageDuration.inSeconds / totalSeconds) * 100
           : 0.0;
 
       // Create badge with app name and percentage
@@ -194,7 +196,7 @@ class _UsageChartWidgetState extends State<UsageChartWidget> {
 
       return PieChartSectionData(
         color: colors[index % colors.length],
-        value: app.usageDuration.inMinutes.toDouble(),
+        value: app.usageDuration.inSeconds.toDouble(), // Use seconds for accurate display
         title: '${percentage.toStringAsFixed(0)}%',
         radius: radius,
         titleStyle: TextStyle(

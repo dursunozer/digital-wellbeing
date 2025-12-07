@@ -20,10 +20,25 @@ final permissionStatusProvider = FutureProvider<bool>((ref) async {
 final appUsageProvider = FutureProvider<List<AppUsageInfo>>((ref) async {
   final service = ref.watch(usageServiceProvider);
   final prefsService = ref.watch(preferencesServiceProvider);
+  
+  // Check if reset timestamp exists and if it's from a previous day
+  final resetTimestamp = await prefsService.getResetTimestamp();
+  final now = DateTime.now();
+  
+  if (resetTimestamp != null) {
+    // If reset was on a different day (day changed at midnight), clear it
+    if (resetTimestamp.day != now.day ||
+        resetTimestamp.month != now.month ||
+        resetTimestamp.year != now.year) {
+      print('🌅 Reset timestamp is from a different day, clearing...');
+      await prefsService.clearResetTimestamp();
+    }
+  }
+  
   final isNewDay = await prefsService.isNewDay();
   
   if (isNewDay) {
-    print('🌅 New day detected! Fetching fresh data...');
+    print('🌅 New day detected! Clearing reset data and fetching fresh...');
     await prefsService.clearResetTimestamp();
     await prefsService.setLastFetchDate(DateTime.now());
   }

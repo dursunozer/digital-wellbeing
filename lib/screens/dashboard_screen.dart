@@ -539,18 +539,38 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ).then((confirmed) async {
       if (confirmed == true) {
         final prefsService = ref.read(preferencesServiceProvider);
-        await prefsService.setResetTimestamp(DateTime.now());
+        final usageService = ref.read(usageServiceProvider);
         
-        ref.invalidate(appUsageProvider);
-        
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.resetInProgress),
-              duration: const Duration(seconds: 2),
-              backgroundColor: Colors.orange,
-            ),
-          );
+        try {
+          // Get RAW usage data (without baseline subtraction) to save as baseline
+          final usageInfoList = await usageService.fetchRawUsageData();
+          
+          // Create baseline map
+          final baseline = <String, int>{};
+          for (final app in usageInfoList) {
+            baseline[app.packageName] = app.usageDuration.inSeconds;
+          }
+          
+          // Save baseline
+          await prefsService.setResetBaseline(baseline);
+          
+          // Set reset timestamp
+          await prefsService.setResetTimestamp(DateTime.now());
+          
+          // Invalidate provider
+          ref.invalidate(appUsageProvider);
+          
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.resetInProgress),
+                duration: const Duration(seconds: 2),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        } catch (e) {
+          print('Error during reset: $e');
         }
       }
     });

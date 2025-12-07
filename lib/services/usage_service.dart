@@ -48,18 +48,9 @@ class UsageService {
       // Check if user has manually reset (get reset timestamp)
       final resetTimestamp = await _preferencesService.getResetTimestamp();
       
-      // Define time range (last 24 hours or since reset)
+      // ALWAYS fetch last 24 hours - baseline subtraction handles the reset
       final endDate = DateTime.now();
-      DateTime startDate;
-      
-      if (resetTimestamp != null) {
-        // User reset manually - only show usage since reset
-        startDate = resetTimestamp;
-        print('🔄 Using reset timestamp: $resetTimestamp');
-      } else {
-        // Normal mode - last 24 hours
-        startDate = endDate.subtract(const Duration(hours: 24));
-      }
+      final startDate = endDate.subtract(const Duration(hours: 24));
 
       print('📊 Fetching usage data from $startDate to $endDate');
 
@@ -74,8 +65,35 @@ class UsageService {
 
       print('✅ Enriched ${enrichedList.length} entries with app metadata');
 
+      // Subtract baseline if reset is active
+      List<AppUsageInfo> adjustedList = enrichedList;
+      if (resetTimestamp != null) {
+        final baseline = await _preferencesService.getResetBaseline();
+        print('🔄 Reset active. Baseline has ${baseline.length} entries');
+        
+        adjustedList = <AppUsageInfo>[];
+        for (final app in enrichedList) {
+          final baselineSeconds = baseline[app.packageName] ?? 0;
+          final currentSeconds = app.usageDuration.inSeconds;
+          final adjustedSeconds = currentSeconds - baselineSeconds;
+          
+          print('   ${app.appName}: current=$currentSeconds, baseline=$baselineSeconds, adjusted=$adjustedSeconds');
+          
+          // Only include apps with positive usage after reset
+          if (adjustedSeconds > 0) {
+            adjustedList.add(AppUsageInfo(
+              packageName: app.packageName,
+              appName: app.appName,
+              appIcon: app.appIcon,
+              usageDuration: Duration(seconds: adjustedSeconds),
+            ));
+          }
+          // Apps with zero or negative adjusted usage are excluded (they were only used before reset)
+        }
+      }
+
       // Filter out system apps and apps with minimal usage
-      final filteredList = _filterApps(enrichedList);
+      final filteredList = _filterApps(adjustedList);
 
       print('✅ After filtering: ${filteredList.length} apps remaining');
 
@@ -100,6 +118,31 @@ class UsageService {
     }
   }
 
+  /// Fetch RAW usage data for the last 24 hours WITHOUT baseline subtraction
+  /// This is used for reset baseline calculation
+  Future<List<AppUsageInfo>> fetchRawUsageData() async {
+    try {
+      final endDate = DateTime.now();
+      final startDate = endDate.subtract(const Duration(hours: 24));
+      
+      print('📊 Fetching RAW usage data from $startDate to $endDate');
+
+      // Fetch usage stats from app_usage package
+      final List<app_usage.AppUsageInfo> usageInfoList = 
+          await _appUsage.getAppUsage(startDate, endDate);
+
+      print('✅ Fetched ${usageInfoList.length} raw usage entries');
+
+      // Convert to our model with app metadata (NO baseline subtraction)
+      final enrichedList = await _enrichWithAppMetadata(usageInfoList);
+
+      return enrichedList;
+    } catch (e, stackTrace) {
+      print('❌ Error fetching raw usage data: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
 
   /// Enrich usage data with app metadata (name, icon)
   Future<List<AppUsageInfo>> _enrichWithAppMetadata(
@@ -231,14 +274,15 @@ class UsageService {
         return false;
       }
 
-      // Filter out common system packages (optional)
-      final systemPackages = [
+      // Filter out system packages and our own app
+      final excludedPackages = [
         'com.android.systemui',
         'com.android.launcher',
         'com.google.android.gms',
+        'com.ozer.digitalwellbeing.digital_wellbeing', // Our own app
       ];
 
-      return !systemPackages.any((pkg) => app.packageName.contains(pkg));
+      return !excludedPackages.any((pkg) => app.packageName.contains(pkg));
     }).toList();
   }
 
