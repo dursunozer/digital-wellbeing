@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
@@ -18,21 +17,27 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  Timer? _refreshTimer;
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with WidgetsBindingObserver {
 
   @override
   void initState() {
     super.initState();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      ref.invalidate(appUsageProvider);
-    });
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    _refreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh data when app comes to foreground
+      ref.invalidate(appUsageProvider);
+    }
   }
 
   @override
@@ -570,7 +575,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             );
           }
         } catch (e) {
-          print('Error during reset: $e');
+          // Error during reset - silently handled
         }
       }
     });

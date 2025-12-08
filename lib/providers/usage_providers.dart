@@ -30,7 +30,6 @@ final appUsageProvider = FutureProvider<List<AppUsageInfo>>((ref) async {
     if (resetTimestamp.day != now.day ||
         resetTimestamp.month != now.month ||
         resetTimestamp.year != now.year) {
-      print('🌅 Reset timestamp is from a different day, clearing...');
       await prefsService.clearResetTimestamp();
     }
   }
@@ -38,7 +37,6 @@ final appUsageProvider = FutureProvider<List<AppUsageInfo>>((ref) async {
   final isNewDay = await prefsService.isNewDay();
   
   if (isNewDay) {
-    print('🌅 New day detected! Clearing reset data and fetching fresh...');
     await prefsService.clearResetTimestamp();
     await prefsService.setLastFetchDate(DateTime.now());
   }

@@ -1,14 +1,16 @@
-import 'dart:typed_data';
+
 import 'package:app_usage/app_usage.dart' as app_usage;
-import 'package:device_apps/device_apps.dart';
+import 'package:installed_apps/installed_apps.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../models/app_usage_info.dart';
 import 'preferences_service.dart';
+import 'icon_cache_service.dart';
 
 /// Service class to handle app usage data fetching and permission management
 class UsageService {
   final app_usage.AppUsage _appUsage = app_usage.AppUsage();
   final PreferencesService _preferencesService;
+  final IconCacheService _iconCache = IconCacheService();
 
   UsageService(this._preferencesService);
 
@@ -37,7 +39,6 @@ class UsageService {
       final opened = await openAppSettings();
       return opened;
     } catch (e) {
-      print('Error opening settings: $e');
       return false;
     }
   }
@@ -52,32 +53,23 @@ class UsageService {
       final endDate = DateTime.now();
       final startDate = endDate.subtract(const Duration(hours: 24));
 
-      print('📊 Fetching usage data from $startDate to $endDate');
-
       // Fetch usage stats from app_usage package
       final List<app_usage.AppUsageInfo> usageInfoList = 
           await _appUsage.getAppUsage(startDate, endDate);
 
-      print('✅ Fetched ${usageInfoList.length} raw usage entries');
-
       // Convert to our model with app metadata
       final enrichedList = await _enrichWithAppMetadata(usageInfoList);
-
-      print('✅ Enriched ${enrichedList.length} entries with app metadata');
 
       // Subtract baseline if reset is active
       List<AppUsageInfo> adjustedList = enrichedList;
       if (resetTimestamp != null) {
         final baseline = await _preferencesService.getResetBaseline();
-        print('🔄 Reset active. Baseline has ${baseline.length} entries');
         
         adjustedList = <AppUsageInfo>[];
         for (final app in enrichedList) {
           final baselineSeconds = baseline[app.packageName] ?? 0;
           final currentSeconds = app.usageDuration.inSeconds;
           final adjustedSeconds = currentSeconds - baselineSeconds;
-          
-          print('   ${app.appName}: current=$currentSeconds, baseline=$baselineSeconds, adjusted=$adjustedSeconds');
           
           // Only include apps with positive usage after reset
           if (adjustedSeconds > 0) {
@@ -88,32 +80,18 @@ class UsageService {
               usageDuration: Duration(seconds: adjustedSeconds),
             ));
           }
-          // Apps with zero or negative adjusted usage are excluded (they were only used before reset)
+          // Apps with zero or negative adjusted usage are excluded
         }
       }
 
       // Filter out system apps and apps with minimal usage
       final filteredList = _filterApps(adjustedList);
 
-      print('✅ After filtering: ${filteredList.length} apps remaining');
-
       // Sort by usage duration (descending)
       filteredList.sort((a, b) => b.usageDuration.compareTo(a.usageDuration));
 
-      if (filteredList.isNotEmpty) {
-        print('📱 Top 3 apps:');
-        for (int i = 0; i < filteredList.length.clamp(0, 3); i++) {
-          final app = filteredList[i];
-          print('   ${i + 1}. ${app.appName}: ${app.usageDuration.inSeconds}s');
-        }
-      } else {
-        print('⚠️ No apps found after filtering!');
-      }
-
       return filteredList;
-    } catch (e, stackTrace) {
-      print('❌ Error fetching usage data: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }
@@ -124,75 +102,56 @@ class UsageService {
     try {
       final endDate = DateTime.now();
       final startDate = endDate.subtract(const Duration(hours: 24));
-      
-      print('📊 Fetching RAW usage data from $startDate to $endDate');
 
       // Fetch usage stats from app_usage package
       final List<app_usage.AppUsageInfo> usageInfoList = 
           await _appUsage.getAppUsage(startDate, endDate);
 
-      print('✅ Fetched ${usageInfoList.length} raw usage entries');
-
       // Convert to our model with app metadata (NO baseline subtraction)
       final enrichedList = await _enrichWithAppMetadata(usageInfoList);
 
       return enrichedList;
-    } catch (e, stackTrace) {
-      print('❌ Error fetching raw usage data: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }
 
-  /// Enrich usage data with app metadata (name, icon)
+  /// Enrich usage data with app metadata (name, icon) - uses icon cache
   Future<List<AppUsageInfo>> _enrichWithAppMetadata(
       List<app_usage.AppUsageInfo> usageList) async {
     final enrichedList = <AppUsageInfo>[];
 
     for (final usage in usageList) {
       try {
-        // Get app info from device_apps
-        final app = await DeviceApps.getApp(usage.packageName, true);
-
-        if (app != null) {
-          // Use friendly name if package name was returned
-          final friendlyName = _getFriendlyAppName(app.appName, usage.packageName);
-          
-          // Validate and extract icon
-          Uint8List? validIcon;
-          try {
-            final appWithIcon = app as ApplicationWithIcon?;
-            if (appWithIcon != null && appWithIcon.icon.isNotEmpty) {
-              // Verify icon data is valid (not corrupted)
-              validIcon = appWithIcon.icon;
-            }
-          } catch (iconError) {
-            print('⚠️ Failed to load icon for ${usage.packageName}: $iconError');
-            // validIcon stays null, will use fallback
+        // Get cached icon
+        final icon = await _iconCache.getIcon(usage.packageName);
+        
+        // Get app name
+        String appName;
+        try {
+          final app = await InstalledApps.getAppInfo(usage.packageName, null);
+          if (app != null) {
+            appName = _getFriendlyAppName(app.name, usage.packageName);
+          } else {
+            appName = _getFriendlyAppName(usage.packageName, usage.packageName);
           }
-          
-          enrichedList.add(AppUsageInfo(
-            packageName: usage.packageName,
-            appName: friendlyName,
-            appIcon: validIcon, // May be null if icon invalid
-            usageDuration: usage.usage,
-          ));
-        } else {
-          // App not found, use friendly name from package
-          enrichedList.add(AppUsageInfo(
-            packageName: usage.packageName,
-            appName: _getFriendlyAppName(usage.packageName, usage.packageName),
-            appIcon: null,
-            usageDuration: usage.usage,
-          ));
+        } catch (e) {
+          appName = _getFriendlyAppName(usage.packageName, usage.packageName);
         }
+
+        enrichedList.add(AppUsageInfo(
+          packageName: usage.packageName,
+          appName: appName,
+          appIcon: icon,
+          usageDuration: usage.usage,
+        ));
       } catch (e) {
         // If we can't get app info, use friendly name from package
         enrichedList.add(AppUsageInfo(
           packageName: usage.packageName,
           appName: _getFriendlyAppName(usage.packageName, usage.packageName),
           appIcon: null,
-          usageDuration : usage.usage,
+          usageDuration: usage.usage,
         ));
       }
     }
@@ -266,7 +225,7 @@ class UsageService {
 
 
 
-  /// Filter out system apps and apps with minimal usage
+  /// Filter out system apps, launchers, and apps with minimal usage
   List<AppUsageInfo> _filterApps(List<AppUsageInfo> apps) {
     return apps.where((app) {
       // Filter out apps with less than 1 minute usage
@@ -274,12 +233,25 @@ class UsageService {
         return false;
       }
 
-      // Filter out system packages and our own app
+      // Filter out system packages, launchers, and our own app
       final excludedPackages = [
+        // System
         'com.android.systemui',
-        'com.android.launcher',
         'com.google.android.gms',
-        'com.ozer.digitalwellbeing.digital_wellbeing', // Our own app
+        // Launchers
+        'com.android.launcher',
+        'com.android.launcher3',
+        'com.google.android.apps.nexuslauncher', // Pixel
+        'com.sec.android.app.launcher',          // Samsung
+        'com.huawei.android.launcher',           // Huawei
+        'com.miui.home',                         // Xiaomi
+        'com.oppo.launcher',                     // Oppo
+        'com.oneplus.launcher',                  // OnePlus
+        'com.vivo.launcher',                     // Vivo
+        'com.teslacoilsw.launcher',              // Nova Launcher
+        'com.microsoft.launcher',                // Microsoft Launcher
+        // Our own app
+        'com.ozer.digitalwellbeing.digital_wellbeing',
       ];
 
       return !excludedPackages.any((pkg) => app.packageName.contains(pkg));
