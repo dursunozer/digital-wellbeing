@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-/// Model class representing app usage information
 class AppUsageInfo {
   final String packageName;
   final String appName;
@@ -14,16 +13,12 @@ class AppUsageInfo {
     required this.usageDuration,
   });
 
-  /// Get usage duration in milliseconds
   int get usageInMilliseconds => usageDuration.inMilliseconds;
 
-  /// Get usage duration in minutes
   int get usageInMinutes => usageDuration.inMinutes;
 
-  /// Get usage duration in hours
   double get usageInHours => usageDuration.inMinutes / 60;
 
-  /// Create a copy with modified fields
   AppUsageInfo copyWith({
     String? packageName,
     String? appName,
@@ -38,7 +33,6 @@ class AppUsageInfo {
     );
   }
 
-  /// Convert to JSON (without icon for simplicity)
   Map<String, dynamic> toJson() {
     return {
       'packageName': packageName,
@@ -47,7 +41,6 @@ class AppUsageInfo {
     };
   }
 
-  /// Create from JSON
   factory AppUsageInfo.fromJson(Map<String, dynamic> json) {
     return AppUsageInfo(
       packageName: json['packageName'] as String,
