@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_usage_info.dart';
+import '../models/feature_settings.dart';
 import '../services/usage_service.dart';
 import '../services/preferences_service.dart';
+import '../services/usage_database.dart';
 
 final preferencesServiceProvider = Provider<PreferencesService>((ref) {
   return PreferencesService();
@@ -10,6 +12,10 @@ final preferencesServiceProvider = Provider<PreferencesService>((ref) {
 final usageServiceProvider = Provider<UsageService>((ref) {
   final prefsService = ref.watch(preferencesServiceProvider);
   return UsageService(prefsService);
+});
+
+final usageDatabaseProvider = Provider<UsageDatabase>((ref) {
+  return UsageDatabase();
 });
 
 final permissionStatusProvider = FutureProvider<bool>((ref) async {
@@ -69,4 +75,25 @@ final top5AppsProvider = Provider<List<AppUsageInfo>>((ref) {
     loading: () => [],
     error: (_, __) => [],
   );
+});
+
+// Feature settings providers
+final appTimersProvider = FutureProvider<List<AppTimer>>((ref) async {
+  final db = ref.watch(usageDatabaseProvider);
+  return await db.getAppTimers();
+});
+
+final bedtimeSettingsProvider = FutureProvider<BedtimeSettings>((ref) async {
+  final db = ref.watch(usageDatabaseProvider);
+  return await db.getBedtimeSettings();
+});
+
+final focusSettingsProvider = FutureProvider<FocusSettings>((ref) async {
+  final db = ref.watch(usageDatabaseProvider);
+  return await db.getFocusSettings();
+});
+
+final screenTimeRemindersProvider = FutureProvider<List<ScreenTimeReminder>>((ref) async {
+  final db = ref.watch(usageDatabaseProvider);
+  return await db.getScreenTimeReminders();
 });

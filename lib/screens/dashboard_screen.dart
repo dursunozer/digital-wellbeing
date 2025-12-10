@@ -4,11 +4,17 @@ import '../l10n/app_localizations.dart';
 import '../providers/usage_providers.dart';
 import '../providers/theme_provider.dart';
 import '../providers/locale_provider.dart';
-import '../utils/duration_formatter.dart';
 import '../utils/app_themes.dart';
 import '../widgets/permission_request_widget.dart';
-import '../widgets/usage_chart_widget.dart';
-import '../widgets/app_usage_list_item.dart';
+import '../widgets/circular_usage_chart.dart';
+import '../widgets/stats_row_widget.dart';
+import '../widgets/feature_menu_widget.dart';
+import '../models/feature_settings.dart';
+import '../screens/app_activity_screen.dart';
+import '../screens/app_timer_screen.dart';
+import '../screens/bedtime_screen.dart';
+import '../screens/focus_screen.dart';
+import '../screens/screen_time_reminders_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -37,6 +43,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     if (state == AppLifecycleState.resumed) {
       // Refresh data when app comes to foreground
       ref.invalidate(appUsageProvider);
+      ref.invalidate(appTimersProvider);
+      ref.invalidate(bedtimeSettingsProvider);
+      ref.invalidate(focusSettingsProvider);
+      ref.invalidate(screenTimeRemindersProvider);
     }
   }
 
@@ -50,6 +60,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     final isDarkMode = ref.watch(themeModeProvider) == ThemeMode.dark;
     final flagEmoji = ref.watch(localeProvider.select((locale) => 
         locale.languageCode == 'en' ? '🇬🇧' : '🇹🇷'));
+
+    // Watch feature settings
+    final appTimersAsync = ref.watch(appTimersProvider);
+    final bedtimeAsync = ref.watch(bedtimeSettingsProvider);
+    final focusAsync = ref.watch(focusSettingsProvider);
+    final remindersAsync = ref.watch(screenTimeRemindersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -91,9 +107,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             tooltip: 'Toggle Theme',
           ),
           IconButton(
-            icon: const Icon(Icons.restart_alt),
-            onPressed: () => _showResetDialog(context, ref, l10n),
-            tooltip: l10n.resetUsage,
+            icon: const Icon(Icons.more_vert),
+            onPressed: () => _showMoreMenu(context, ref, l10n),
+            tooltip: 'More',
           ),
         ],
       ),
@@ -161,90 +177,93 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   );
                 }
 
-                final maxUsage = apps.first.usageDuration.inMinutes.toDouble();
+                // Get feature settings with defaults
+                final appTimersCount = appTimersAsync.when(
+                  data: (timers) => timers.length,
+                  loading: () => 0,
+                  error: (_, __) => 0,
+                );
+                final bedtimeSettings = bedtimeAsync.when(
+                  data: (settings) => settings,
+                  loading: () => BedtimeSettings(),
+                  error: (_, __) => BedtimeSettings(),
+                );
+                final focusSettings = focusAsync.when(
+                  data: (settings) => settings,
+                  loading: () => FocusSettings(),
+                  error: (_, __) => FocusSettings(),
+                );
+                final remindersEnabled = remindersAsync.when(
+                  data: (reminders) => reminders.any((r) => r.isEnabled),
+                  loading: () => false,
+                  error: (_, __) => false,
+                );
 
                 return RefreshIndicator(
                   onRefresh: () async {
                     ref.invalidate(appUsageProvider);
+                    ref.invalidate(appTimersProvider);
+                    ref.invalidate(bedtimeSettingsProvider);
+                    ref.invalidate(focusSettingsProvider);
+                    ref.invalidate(screenTimeRemindersProvider);
                     await ref.read(appUsageProvider.future);
                   },
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: _buildSummaryCard(l10n, totalScreenTime, isDarkMode),
-                      ),
-
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.topApps,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDarkMode
-                                      ? Colors.grey.shade200
-                                      : Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: isDarkMode
-                                      ? Colors.grey.shade800
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                          alpha: isDarkMode ? 0.3 : 0.08),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: UsageChartWidget(apps: top5Apps),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Circular chart section
+                        Container(
+                          margin: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDarkMode ? Colors.grey[850] : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.08),
+                                blurRadius: 15,
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                          child: Text(
-                            l10n.allApps(apps.length),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? Colors.grey.shade200
-                                  : Colors.black,
-                            ),
+                          child: CircularUsageChart(
+                            apps: top5Apps,
+                            totalScreenTime: totalScreenTime,
                           ),
                         ),
-                      ),
 
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            return AppUsageListItem(
-                              app: apps[index],
-                              maxUsage: maxUsage,
-                            );
-                          },
-                          childCount: apps.length,
+                        // Stats row (Unlocks and Notifications)
+                        const StatsRowWidget(
+                          unlockCount: 0, // Will be implemented with Android API
+                          notificationCount: 0, // Will be implemented with NotificationListenerService
                         ),
-                      ),
 
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 20),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+
+                        // View app activity details link
+                        _buildActivityLink(context, l10n, isDarkMode),
+
+                        const SizedBox(height: 16),
+
+                        // Feature menu
+                        FeatureMenuWidget(
+                          appTimersCount: appTimersCount,
+                          bedtimeSettings: bedtimeSettings,
+                          focusSettings: focusSettings,
+                          screenTimeRemindersEnabled: remindersEnabled,
+                          onAppTimersTap: () => _navigateToAppTimers(context),
+                          onBedtimeModeTap: () => _navigateToBedtime(context),
+                          onFocusTap: () => _navigateToFocus(context),
+                          onScreenTimeRemindersTap: () => _navigateToReminders(context),
+                          onManageNotificationsTap: () => _openNotificationSettings(),
+                          onHeadsUpTap: () => _showHeadsUpInfo(context, l10n),
+                        ),
+
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -320,78 +339,117 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     );
   }
 
-  Widget _buildSummaryCard(AppLocalizations l10n, Duration totalScreenTime, bool isDarkMode) {
+  Widget _buildActivityLink(BuildContext context, AppLocalizations l10n, bool isDarkMode) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDarkMode
-              ? AppThemes.darkAccentGradient
-              : AppThemes.lightGradient,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: isDarkMode ? Colors.grey[850] : Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDarkMode
-                ? Colors.black.withValues(alpha: 0.5)
-                : Colors.blue.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
+            color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.access_time,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  l10n.totalScreenTime,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Icon(
+          Icons.bar_chart,
+          color: isDarkMode ? Colors.blue[300] : Colors.blue[700],
+        ),
+        title: Text(
+          l10n.viewAppActivityDetails,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: isDarkMode ? Colors.blue[300] : Colors.blue[700],
           ),
-          const SizedBox(height: 20),
-          Text(
-            DurationFormatter.format(totalScreenTime, l10n),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -1,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.last24Hours,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontSize: 14,
-            ),
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+        ),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AppActivityScreen()),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToAppTimers(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AppTimerScreen()),
+    ).then((_) => ref.invalidate(appTimersProvider));
+  }
+
+  void _navigateToBedtime(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BedtimeScreen()),
+    ).then((_) => ref.invalidate(bedtimeSettingsProvider));
+  }
+
+  void _navigateToFocus(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FocusScreen()),
+    ).then((_) => ref.invalidate(focusSettingsProvider));
+  }
+
+  void _navigateToReminders(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ScreenTimeRemindersScreen()),
+    ).then((_) => ref.invalidate(screenTimeRemindersProvider));
+  }
+
+  void _openNotificationSettings() {
+    // Open Android notification settings
+    // This would require platform-specific code, for now just show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Opening notification settings...')),
+    );
+  }
+
+  void _showHeadsUpInfo(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.headsUp),
+        content: const Text(
+          'Heads Up helps you stay aware of your surroundings while walking by reminding you to look up from your phone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showMoreMenu(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.restart_alt),
+              title: Text(l10n.resetUsage),
+              onTap: () {
+                Navigator.pop(context);
+                _showResetDialog(context, ref, l10n);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -442,7 +500,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDarkMode 
-                  ? Colors.blue.shade900.withValues(alpha: 0.3)
+                  ? Colors.blue.shade900.withOpacity(0.3)
                   : Colors.blue.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -481,7 +539,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isDarkMode
-                  ? Colors.orange.shade900.withValues(alpha: 0.3)
+                  ? Colors.orange.shade900.withOpacity(0.3)
                   : Colors.teal.shade50,
               borderRadius: BorderRadius.circular(8),
             ),

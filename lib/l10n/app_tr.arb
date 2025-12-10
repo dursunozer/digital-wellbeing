@@ -35,5 +35,96 @@
   "resetConfirmMessage": "Bu işlem mevcut kullanım verilerini temizleyip yeni istatistikler alacak.",
   "cancel": "İptal",
   "reset": "Sıfırla",
-  "resetInProgress": "Kullanım verileri sıfırlanıyor..."
+  "resetInProgress": "Kullanım verileri sıfırlanıyor...",
+  
+  "today": "BUGÜN",
+  "unlocks": "Kilit Açma",
+  "notifications": "Bildirimler",
+  "viewAppActivityDetails": "Uygulama etkinlik ayrıntılarını görüntüle",
+  "waysToDisconnect": "Bağlantıyı kesme yolları",
+  "reduceInterruptions": "Kesintileri azaltın",
+  
+  "appTimers": "Uygulama zamanlayıcıları",
+  "appTimersSubtitle": "Zamanlayıcı ayarlanmadı",
+  "appTimersSubtitleCount": "{count} zamanlayıcı ayarlandı",
+  "@appTimersSubtitleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "bedtimeMode": "Uyku vakti modu",
+  "bedtimeModeOff": "Kapalı",
+  "bedtimeModeSchedule": "{start} - {end}",
+  "@bedtimeModeSchedule": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "focus": "Odaklanma",
+  "focusTapToSetUp": "Ayarlamak için dokunun",
+  "focusActive": "Aktif",
+  
+  "screenTimeReminders": "Ekran süresi hatırlatıcıları",
+  "screenTimeRemindersOff": "Kapalı",
+  "screenTimeRemindersOn": "Açık",
+  
+  "manageNotifications": "Bildirimleri yönet",
+  "headsUp": "Dikkat",
+  "headsUpSubtitle": "Ayarlamak için dokunun",
+  
+  "appActivityTitle": "Uygulama etkinliği",
+  "dailyAverage": "Günlük ortalama",
+  "thisWeek": "Bu hafta",
+  "usageByApp": "Uygulamaya göre kullanım",
+  
+  "setTimer": "Zamanlayıcı ayarla",
+  "dailyLimit": "Günlük limit",
+  "noLimit": "Limit yok",
+  "minutes": "dakika",
+  "hours": "saat",
+  "timerSet": "Zamanlayıcı ayarlandı",
+  "timerRemoved": "Zamanlayıcı kaldırıldı",
+  
+  "bedtimeSettingsTitle": "Uyku vakti modu",
+  "bedtimeStart": "Başlangıç saati",
+  "bedtimeEnd": "Bitiş saati",
+  "bedtimeActiveDays": "Aktif günler",
+  "bedtimeOptions": "Uyku vakti seçenekleri",
+  "grayscale": "Gri tonlama",
+  "doNotDisturb": "Rahatsız Etmeyin",
+  
+  "focusModeTitle": "Odaklanma modu",
+  "selectAppsToBlock": "Duraklatılacak uygulamaları seçin",
+  "takeABreak": "Mola ver",
+  "startFocus": "Odaklanmayı başlat",
+  "endFocus": "Odaklanmayı bitir",
+  
+  "reminderThreshold": "Şu süreden sonra hatırlat",
+  "addReminder": "Hatırlatıcı ekle",
+  "editReminder": "Hatırlatıcıyı düzenle",
+  "deleteReminder": "Hatırlatıcıyı sil",
+  
+  "monday": "Pzt",
+  "tuesday": "Sal",
+  "wednesday": "Çar",
+  "thursday": "Per",
+  "friday": "Cum",
+  "saturday": "Cmt",
+  "sunday": "Paz",
+  
+  "save": "Kaydet",
+  "delete": "Sil",
+  "enable": "Etkinleştir",
+  "disable": "Devre dışı bırak",
+  "on": "Açık",
+  "off": "Kapalı"
 }

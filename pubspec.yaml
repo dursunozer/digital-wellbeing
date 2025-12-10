@@ -53,6 +53,10 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.2.3
   
+  # SQLite Database
+  sqflite: ^2.3.0
+  path: ^1.9.0
+  
   # Formatting
   intl: ^0.20.2
 

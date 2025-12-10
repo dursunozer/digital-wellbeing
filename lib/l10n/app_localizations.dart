@@ -277,6 +277,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resetting usage data...'**
   String get resetInProgress;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'TODAY'**
+  String get today;
+
+  /// No description provided for @unlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocks'**
+  String get unlocks;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @viewAppActivityDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View app activity details'**
+  String get viewAppActivityDetails;
+
+  /// No description provided for @waysToDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Ways to disconnect'**
+  String get waysToDisconnect;
+
+  /// No description provided for @reduceInterruptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce interruptions'**
+  String get reduceInterruptions;
+
+  /// No description provided for @appTimers.
+  ///
+  /// In en, this message translates to:
+  /// **'App timers'**
+  String get appTimers;
+
+  /// No description provided for @appTimersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No timers set'**
+  String get appTimersSubtitle;
+
+  /// No description provided for @appTimersSubtitleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} timer(s) set'**
+  String appTimersSubtitleCount(int count);
+
+  /// No description provided for @bedtimeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime mode'**
+  String get bedtimeMode;
+
+  /// No description provided for @bedtimeModeOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get bedtimeModeOff;
+
+  /// No description provided for @bedtimeModeSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} - {end}'**
+  String bedtimeModeSchedule(String start, String end);
+
+  /// No description provided for @focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get focus;
+
+  /// No description provided for @focusTapToSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to set up'**
+  String get focusTapToSetUp;
+
+  /// No description provided for @focusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get focusActive;
+
+  /// No description provided for @screenTimeReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen time reminders'**
+  String get screenTimeReminders;
+
+  /// No description provided for @screenTimeRemindersOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get screenTimeRemindersOff;
+
+  /// No description provided for @screenTimeRemindersOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get screenTimeRemindersOn;
+
+  /// No description provided for @manageNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage notifications'**
+  String get manageNotifications;
+
+  /// No description provided for @headsUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Heads Up'**
+  String get headsUp;
+
+  /// No description provided for @headsUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to set up'**
+  String get headsUpSubtitle;
+
+  /// No description provided for @appActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App activity'**
+  String get appActivityTitle;
+
+  /// No description provided for @dailyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily average'**
+  String get dailyAverage;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get thisWeek;
+
+  /// No description provided for @usageByApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage by app'**
+  String get usageByApp;
+
+  /// No description provided for @setTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Set timer'**
+  String get setTimer;
+
+  /// No description provided for @dailyLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily limit'**
+  String get dailyLimit;
+
+  /// No description provided for @noLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'No limit'**
+  String get noLimit;
+
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes'**
+  String get minutes;
+
+  /// No description provided for @hours.
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get hours;
+
+  /// No description provided for @timerSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer set'**
+  String get timerSet;
+
+  /// No description provided for @timerRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer removed'**
+  String get timerRemoved;
+
+  /// No description provided for @bedtimeSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime mode'**
+  String get bedtimeSettingsTitle;
+
+  /// No description provided for @bedtimeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start time'**
+  String get bedtimeStart;
+
+  /// No description provided for @bedtimeEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End time'**
+  String get bedtimeEnd;
+
+  /// No description provided for @bedtimeActiveDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Active days'**
+  String get bedtimeActiveDays;
+
+  /// No description provided for @bedtimeOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime options'**
+  String get bedtimeOptions;
+
+  /// No description provided for @grayscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Grayscale'**
+  String get grayscale;
+
+  /// No description provided for @doNotDisturb.
+  ///
+  /// In en, this message translates to:
+  /// **'Do Not Disturb'**
+  String get doNotDisturb;
+
+  /// No description provided for @focusModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus mode'**
+  String get focusModeTitle;
+
+  /// No description provided for @selectAppsToBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Select apps to pause'**
+  String get selectAppsToBlock;
+
+  /// No description provided for @takeABreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a break'**
+  String get takeABreak;
+
+  /// No description provided for @startFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Start focus'**
+  String get startFocus;
+
+  /// No description provided for @endFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'End focus'**
+  String get endFocus;
+
+  /// No description provided for @reminderThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me after'**
+  String get reminderThreshold;
+
+  /// No description provided for @addReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get addReminder;
+
+  /// No description provided for @editReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reminder'**
+  String get editReminder;
+
+  /// No description provided for @deleteReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete reminder'**
+  String get deleteReminder;
+
+  /// No description provided for @monday.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get monday;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get friday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get sunday;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
+  /// No description provided for @disable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get disable;
+
+  /// No description provided for @on.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get on;
+
+  /// No description provided for @off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get off;
 }
 
 class _AppLocalizationsDelegate

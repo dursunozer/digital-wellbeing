@@ -35,5 +35,96 @@
   "resetConfirmMessage": "This will clear all current usage data and fetch fresh statistics.",
   "cancel": "Cancel",
   "reset": "Reset",
-  "resetInProgress": "Resetting usage data..."
+  "resetInProgress": "Resetting usage data...",
+  
+  "today": "TODAY",
+  "unlocks": "Unlocks",
+  "notifications": "Notifications",
+  "viewAppActivityDetails": "View app activity details",
+  "waysToDisconnect": "Ways to disconnect",
+  "reduceInterruptions": "Reduce interruptions",
+  
+  "appTimers": "App timers",
+  "appTimersSubtitle": "No timers set",
+  "appTimersSubtitleCount": "{count} timer(s) set",
+  "@appTimersSubtitleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "bedtimeMode": "Bedtime mode",
+  "bedtimeModeOff": "Off",
+  "bedtimeModeSchedule": "{start} - {end}",
+  "@bedtimeModeSchedule": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "focus": "Focus",
+  "focusTapToSetUp": "Tap to set up",
+  "focusActive": "Active",
+  
+  "screenTimeReminders": "Screen time reminders",
+  "screenTimeRemindersOff": "Off",
+  "screenTimeRemindersOn": "On",
+  
+  "manageNotifications": "Manage notifications",
+  "headsUp": "Heads Up",
+  "headsUpSubtitle": "Tap to set up",
+  
+  "appActivityTitle": "App activity",
+  "dailyAverage": "Daily average",
+  "thisWeek": "This week",
+  "usageByApp": "Usage by app",
+  
+  "setTimer": "Set timer",
+  "dailyLimit": "Daily limit",
+  "noLimit": "No limit",
+  "minutes": "minutes",
+  "hours": "hours",
+  "timerSet": "Timer set",
+  "timerRemoved": "Timer removed",
+  
+  "bedtimeSettingsTitle": "Bedtime mode",
+  "bedtimeStart": "Start time",
+  "bedtimeEnd": "End time",
+  "bedtimeActiveDays": "Active days",
+  "bedtimeOptions": "Bedtime options",
+  "grayscale": "Grayscale",
+  "doNotDisturb": "Do Not Disturb",
+  
+  "focusModeTitle": "Focus mode",
+  "selectAppsToBlock": "Select apps to pause",
+  "takeABreak": "Take a break",
+  "startFocus": "Start focus",
+  "endFocus": "End focus",
+  
+  "reminderThreshold": "Remind me after",
+  "addReminder": "Add reminder",
+  "editReminder": "Edit reminder",
+  "deleteReminder": "Delete reminder",
+  
+  "monday": "Mon",
+  "tuesday": "Tue",
+  "wednesday": "Wed",
+  "thursday": "Thu",
+  "friday": "Fri",
+  "saturday": "Sat",
+  "sunday": "Sun",
+  
+  "save": "Save",
+  "delete": "Delete",
+  "enable": "Enable",
+  "disable": "Disable",
+  "on": "On",
+  "off": "Off"
 }
