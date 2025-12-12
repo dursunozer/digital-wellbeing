@@ -126,5 +126,9 @@
   "enable": "Enable",
   "disable": "Disable",
   "on": "On",
-  "off": "Off"
+  "off": "Off",
+  
+  "limit": "Limit",
+  "remaining": "remaining",
+  "limitExceeded": "Limit exceeded"
 }

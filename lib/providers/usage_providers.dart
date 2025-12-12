@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_usage_info.dart';
 import '../models/feature_settings.dart';
+import '../models/daily_usage.dart';
 import '../services/usage_service.dart';
 import '../services/preferences_service.dart';
 import '../services/usage_database.dart';
@@ -26,6 +27,7 @@ final permissionStatusProvider = FutureProvider<bool>((ref) async {
 final appUsageProvider = FutureProvider<List<AppUsageInfo>>((ref) async {
   final service = ref.watch(usageServiceProvider);
   final prefsService = ref.watch(preferencesServiceProvider);
+  final db = ref.watch(usageDatabaseProvider);
   
   // Check if reset timestamp exists and if it's from a previous day
   final resetTimestamp = await prefsService.getResetTimestamp();
@@ -47,9 +49,54 @@ final appUsageProvider = FutureProvider<List<AppUsageInfo>>((ref) async {
     await prefsService.setLastFetchDate(DateTime.now());
   }
   
- 
-  return await service.fetchUsageData();
+  // Fetch and save missing days from past week
+  await _fetchAndSaveMissingDays(service, db);
+  
+  final apps = await service.fetchUsageData();
+  
+  // Save today's usage to database for history
+  final totalTime = service.calculateTotalScreenTime(apps);
+  final dailyUsage = DailyUsage(
+    date: DateTime.now(),
+    totalScreenTime: totalTime,
+    unlockCount: 0,
+    notificationCount: 0,
+    apps: apps,
+  );
+  await db.saveDailyUsage(dailyUsage);
+  
+  return apps;
 });
+
+/// Fetch and save missing days from the past week
+Future<void> _fetchAndSaveMissingDays(UsageService service, UsageDatabase db) async {
+  final now = DateTime.now();
+  
+  // Check last 7 days
+  for (int i = 1; i <= 7; i++) {
+    final date = now.subtract(Duration(days: i));
+    
+    // Check if data exists for this date
+    final existingData = await db.getDailyUsage(date);
+    
+    // If no data or empty data, try to fetch from Android API
+    if (existingData == null || existingData.totalScreenTime.inSeconds == 0) {
+      final apps = await service.fetchUsageDataForDate(date);
+      
+      if (apps.isNotEmpty) {
+        final totalTime = service.calculateTotalScreenTime(apps);
+        final dailyUsage = DailyUsage(
+          date: date,
+          totalScreenTime: totalTime,
+          unlockCount: 0,
+          notificationCount: 0,
+          apps: apps,
+        );
+        await db.saveDailyUsage(dailyUsage);
+      }
+    }
+  }
+}
 
 final totalScreenTimeProvider = Provider<Duration>((ref) {
   final usageAsync = ref.watch(appUsageProvider);
@@ -96,4 +143,10 @@ final focusSettingsProvider = FutureProvider<FocusSettings>((ref) async {
 final screenTimeRemindersProvider = FutureProvider<List<ScreenTimeReminder>>((ref) async {
   final db = ref.watch(usageDatabaseProvider);
   return await db.getScreenTimeReminders();
+});
+
+// Weekly usage history provider
+final weeklyUsageHistoryProvider = FutureProvider<List<DailyUsage>>((ref) async {
+  final db = ref.watch(usageDatabaseProvider);
+  return await db.getUsageHistory(7);
 });

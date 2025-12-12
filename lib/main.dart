@@ -6,8 +6,15 @@ import 'providers/theme_provider.dart';
 import 'providers/locale_provider.dart';
 import 'utils/app_themes.dart';
 import 'l10n/app_localizations.dart';
+import 'services/background_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize background service for periodic data saving
+  await BackgroundService.initialize();
+  await BackgroundService.registerPeriodicTask();
+  
   runApp(
     // Wrap the app with ProviderScope for Riverpod
     const ProviderScope(

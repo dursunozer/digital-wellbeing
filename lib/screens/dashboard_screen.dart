@@ -7,7 +7,6 @@ import '../providers/locale_provider.dart';
 import '../utils/app_themes.dart';
 import '../widgets/permission_request_widget.dart';
 import '../widgets/circular_usage_chart.dart';
-import '../widgets/stats_row_widget.dart';
 import '../widgets/feature_menu_widget.dart';
 import '../models/feature_settings.dart';
 import '../screens/app_activity_screen.dart';
@@ -234,14 +233,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           ),
                         ),
 
-                        // Stats row (Unlocks and Notifications)
-                        const StatsRowWidget(
-                          unlockCount: 0, // Will be implemented with Android API
-                          notificationCount: 0, // Will be implemented with NotificationListenerService
-                        ),
-
-                        const SizedBox(height: 16),
-
                         // View app activity details link
                         _buildActivityLink(context, l10n, isDarkMode),
 
@@ -257,8 +248,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           onBedtimeModeTap: () => _navigateToBedtime(context),
                           onFocusTap: () => _navigateToFocus(context),
                           onScreenTimeRemindersTap: () => _navigateToReminders(context),
-                          onManageNotificationsTap: () => _openNotificationSettings(),
-                          onHeadsUpTap: () => _showHeadsUpInfo(context, l10n),
                         ),
 
                         const SizedBox(height: 32),
@@ -407,32 +396,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     ).then((_) => ref.invalidate(screenTimeRemindersProvider));
   }
 
-  void _openNotificationSettings() {
-    // Open Android notification settings
-    // This would require platform-specific code, for now just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Opening notification settings...')),
-    );
-  }
-
-  void _showHeadsUpInfo(BuildContext context, AppLocalizations l10n) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.headsUp),
-        content: const Text(
-          'Heads Up helps you stay aware of your surroundings while walking by reminding you to look up from your phone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showMoreMenu(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
     showModalBottomSheet(
       context: context,
@@ -543,7 +506,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   : Colors.teal.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+              child: Icon(
               icon,
               color: isDarkMode ? Colors.orange.shade300 : Colors.teal.shade700,
               size: 20,

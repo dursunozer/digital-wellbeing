@@ -43,15 +43,16 @@ class UsageService {
     }
   }
 
-  /// Fetch app usage data for the last 24 hours
+  /// Fetch app usage data for today (from midnight)
   Future<List<AppUsageInfo>> fetchUsageData() async {
     try {
       // Check if user has manually reset (get reset timestamp)
       final resetTimestamp = await _preferencesService.getResetTimestamp();
       
-      // ALWAYS fetch last 24 hours - baseline subtraction handles the reset
-      final endDate = DateTime.now();
-      final startDate = endDate.subtract(const Duration(hours: 24));
+      // Fetch today's usage (from midnight to now) - like Android Digital Wellbeing
+      final now = DateTime.now();
+      final startDate = DateTime(now.year, now.month, now.day); // Today 00:00
+      final endDate = now;
 
       // Fetch usage stats from app_usage package
       final List<app_usage.AppUsageInfo> usageInfoList = 
@@ -96,12 +97,13 @@ class UsageService {
     }
   }
 
-  /// Fetch RAW usage data for the last 24 hours WITHOUT baseline subtraction
+  /// Fetch RAW usage data for today WITHOUT baseline subtraction
   /// This is used for reset baseline calculation
   Future<List<AppUsageInfo>> fetchRawUsageData() async {
     try {
-      final endDate = DateTime.now();
-      final startDate = endDate.subtract(const Duration(hours: 24));
+      final now = DateTime.now();
+      final startDate = DateTime(now.year, now.month, now.day); // Today 00:00
+      final endDate = now;
 
       // Fetch usage stats from app_usage package
       final List<app_usage.AppUsageInfo> usageInfoList = 
@@ -113,6 +115,39 @@ class UsageService {
       return enrichedList;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  /// Fetch usage data for a specific date
+  /// Used to retrieve historical data for previous days
+  Future<List<AppUsageInfo>> fetchUsageDataForDate(DateTime date) async {
+    try {
+      // Set date range for the entire day
+      final startDate = DateTime(date.year, date.month, date.day); // 00:00
+      final endDate = DateTime(date.year, date.month, date.day, 23, 59, 59); // 23:59:59
+      
+      // For today, use current time as end
+      final now = DateTime.now();
+      final isToday = date.year == now.year && 
+                      date.month == now.month && 
+                      date.day == now.day;
+      
+      final actualEndDate = isToday ? now : endDate;
+
+      // Fetch usage stats from app_usage package
+      final List<app_usage.AppUsageInfo> usageInfoList = 
+          await _appUsage.getAppUsage(startDate, actualEndDate);
+
+      // Convert to our model with app metadata
+      final enrichedList = await _enrichWithAppMetadata(usageInfoList);
+
+      // Filter and sort
+      final filteredList = _filterApps(enrichedList);
+      filteredList.sort((a, b) => b.usageDuration.compareTo(a.usageDuration));
+
+      return filteredList;
+    } catch (e) {
+      return [];
     }
   }
 

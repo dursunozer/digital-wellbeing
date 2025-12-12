@@ -290,4 +290,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get off => 'Off';
+
+  @override
+  String get limit => 'Limit';
+
+  @override
+  String get remaining => 'remaining';
+
+  @override
+  String get limitExceeded => 'Limit exceeded';
 }

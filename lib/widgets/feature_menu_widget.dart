@@ -16,8 +16,6 @@ class FeatureMenuWidget extends StatelessWidget {
   final FeatureMenuCallback onBedtimeModeTap;
   final FeatureMenuCallback onFocusTap;
   final FeatureMenuCallback onScreenTimeRemindersTap;
-  final FeatureMenuCallback onManageNotificationsTap;
-  final FeatureMenuCallback onHeadsUpTap;
 
   const FeatureMenuWidget({
     super.key,
@@ -29,8 +27,6 @@ class FeatureMenuWidget extends StatelessWidget {
     required this.onBedtimeModeTap,
     required this.onFocusTap,
     required this.onScreenTimeRemindersTap,
-    required this.onManageNotificationsTap,
-    required this.onHeadsUpTap,
   });
 
   @override
@@ -93,34 +89,6 @@ class FeatureMenuWidget extends StatelessWidget {
             ),
           ],
         ),
-        
-        const SizedBox(height: 24),
-        
-        // Reduce interruptions section
-        _SectionHeader(
-          title: l10n.reduceInterruptions,
-          isDarkMode: isDarkMode,
-        ),
-        _MenuCard(
-          isDarkMode: isDarkMode,
-          children: [
-            _MenuItem(
-              icon: Icons.notifications_outlined,
-              title: l10n.manageNotifications,
-              subtitle: null,
-              onTap: onManageNotificationsTap,
-              isDarkMode: isDarkMode,
-            ),
-            _MenuDivider(isDarkMode: isDarkMode),
-            _MenuItem(
-              icon: Icons.phone_android,
-              title: l10n.headsUp,
-              subtitle: l10n.headsUpSubtitle,
-              onTap: onHeadsUpTap,
-              isDarkMode: isDarkMode,
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -169,7 +137,7 @@ class _MenuCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.08),
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

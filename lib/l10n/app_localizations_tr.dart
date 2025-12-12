@@ -293,4 +293,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get off => 'Kapalı';
+
+  @override
+  String get limit => 'Limit';
+
+  @override
+  String get remaining => 'kaldı';
+
+  @override
+  String get limitExceeded => 'Limit aşıldı';
 }

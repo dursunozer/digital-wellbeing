@@ -126,5 +126,9 @@
   "enable": "Etkinleştir",
   "disable": "Devre dışı bırak",
   "on": "Açık",
-  "off": "Kapalı"
+  "off": "Kapalı",
+  
+  "limit": "Limit",
+  "remaining": "kaldı",
+  "limitExceeded": "Limit aşıldı"
 }
