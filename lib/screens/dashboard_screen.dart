@@ -40,7 +40,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Refresh data when app comes to foreground
+      // Refresh permission status first (in case user just granted permission)
+      ref.invalidate(permissionStatusProvider);
+      // Then refresh data when app comes to foreground
       ref.invalidate(appUsageProvider);
       ref.invalidate(appTimersProvider);
       ref.invalidate(bedtimeSettingsProvider);

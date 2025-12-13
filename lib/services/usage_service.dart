@@ -1,6 +1,5 @@
 
 import 'package:app_usage/app_usage.dart' as app_usage;
-import 'package:installed_apps/installed_apps.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../models/app_usage_info.dart';
 import 'preferences_service.dart';
@@ -152,32 +151,42 @@ class UsageService {
   }
 
   /// Enrich usage data with app metadata (name, icon) - uses icon cache
+  /// Optimized to preload all uncached packages in parallel
   Future<List<AppUsageInfo>> _enrichWithAppMetadata(
       List<app_usage.AppUsageInfo> usageList) async {
+    
+    // Step 1: Find packages that need to be loaded (not in cache)
+    final uncachedPackages = usageList
+        .where((u) => !_iconCache.isCached(u.packageName))
+        .map((u) => u.packageName)
+        .toSet()
+        .toList();
+    
+    // Step 2: Preload all uncached packages in parallel
+    // This is much faster than loading them one by one
+    if (uncachedPackages.isNotEmpty) {
+      await Future.wait(
+        uncachedPackages.map((pkg) => _iconCache.getAppInfo(pkg)),
+      );
+    }
+    
+    // Step 3: Now build the enriched list from cache (all data is cached now)
     final enrichedList = <AppUsageInfo>[];
 
     for (final usage in usageList) {
       try {
-        // Get cached icon
-        final icon = await _iconCache.getIcon(usage.packageName);
+        // Get cached info (icon + name in one call)
+        final cachedInfo = await _iconCache.getAppInfo(usage.packageName);
         
-        // Get app name
-        String appName;
-        try {
-          final app = await InstalledApps.getAppInfo(usage.packageName, null);
-          if (app != null) {
-            appName = _getFriendlyAppName(app.name, usage.packageName);
-          } else {
-            appName = _getFriendlyAppName(usage.packageName, usage.packageName);
-          }
-        } catch (e) {
-          appName = _getFriendlyAppName(usage.packageName, usage.packageName);
-        }
+        // Get app name from cache or generate friendly name
+        final appName = cachedInfo.name != null
+            ? _getFriendlyAppName(cachedInfo.name!, usage.packageName)
+            : _getFriendlyAppName(usage.packageName, usage.packageName);
 
         enrichedList.add(AppUsageInfo(
           packageName: usage.packageName,
           appName: appName,
-          appIcon: icon,
+          appIcon: cachedInfo.icon,
           usageDuration: usage.usage,
         ));
       } catch (e) {

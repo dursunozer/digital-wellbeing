@@ -49,8 +49,8 @@ final appUsageProvider = FutureProvider<List<AppUsageInfo>>((ref) async {
     await prefsService.setLastFetchDate(DateTime.now());
   }
   
-  // Fetch and save missing days from past week
-  await _fetchAndSaveMissingDays(service, db);
+  // Set installation date if not already set
+  await prefsService.setInstallationDateIfNeeded();
   
   final apps = await service.fetchUsageData();
   
@@ -67,36 +67,6 @@ final appUsageProvider = FutureProvider<List<AppUsageInfo>>((ref) async {
   
   return apps;
 });
-
-/// Fetch and save missing days from the past week
-Future<void> _fetchAndSaveMissingDays(UsageService service, UsageDatabase db) async {
-  final now = DateTime.now();
-  
-  // Check last 7 days
-  for (int i = 1; i <= 7; i++) {
-    final date = now.subtract(Duration(days: i));
-    
-    // Check if data exists for this date
-    final existingData = await db.getDailyUsage(date);
-    
-    // If no data or empty data, try to fetch from Android API
-    if (existingData == null || existingData.totalScreenTime.inSeconds == 0) {
-      final apps = await service.fetchUsageDataForDate(date);
-      
-      if (apps.isNotEmpty) {
-        final totalTime = service.calculateTotalScreenTime(apps);
-        final dailyUsage = DailyUsage(
-          date: date,
-          totalScreenTime: totalTime,
-          unlockCount: 0,
-          notificationCount: 0,
-          apps: apps,
-        );
-        await db.saveDailyUsage(dailyUsage);
-      }
-    }
-  }
-}
 
 final totalScreenTimeProvider = Provider<Duration>((ref) {
   final usageAsync = ref.watch(appUsageProvider);

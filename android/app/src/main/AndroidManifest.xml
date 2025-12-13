@@ -2,6 +2,14 @@
     <!-- Permission to access app usage statistics -->
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     
+    <!-- Notification permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    
+    <!-- Boot permission for workmanager -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    
     <application
         android:label="digital_wellbeing"
         android:name="${applicationName}"

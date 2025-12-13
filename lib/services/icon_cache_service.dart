@@ -1,69 +1,121 @@
 import 'dart:typed_data';
 import 'package:installed_apps/installed_apps.dart';
 
-/// Service for caching app icons in memory to avoid repeated disk reads
+/// Cached app information containing icon and name
+class CachedAppInfo {
+  final Uint8List? icon;
+  final String? name;
+  
+  const CachedAppInfo({this.icon, this.name});
+}
+
 class IconCacheService {
-  // Singleton instance
+
   static final IconCacheService _instance = IconCacheService._internal();
   factory IconCacheService() => _instance;
   IconCacheService._internal();
 
-  // In-memory cache: packageName -> icon bytes
+  // Cache for icons
   final Map<String, Uint8List?> _iconCache = {};
   
-  // Track packages that failed to load (to avoid retrying)
+  // Cache for app names
+  final Map<String, String?> _nameCache = {};
+  
+  // Packages that failed to load
   final Set<String> _failedPackages = {};
+  
+  // Track in-progress fetches to avoid duplicate calls
+  final Map<String, Future<CachedAppInfo>> _pendingFetches = {};
 
-  /// Get icon for a package, using cache if available
-  Future<Uint8List?> getIcon(String packageName) async {
-    // Return cached icon if exists
-    if (_iconCache.containsKey(packageName)) {
-      return _iconCache[packageName];
+  /// Get both icon and name for a package in a single call
+  /// This is more efficient than calling getIcon and getAppName separately
+  Future<CachedAppInfo> getAppInfo(String packageName) async {
+    // Return from cache if available
+    if (_iconCache.containsKey(packageName) && _nameCache.containsKey(packageName)) {
+      return CachedAppInfo(
+        icon: _iconCache[packageName],
+        name: _nameCache[packageName],
+      );
     }
 
-    // Skip if previously failed
+    // Return early for known failed packages
     if (_failedPackages.contains(packageName)) {
-      return null;
+      return const CachedAppInfo();
     }
 
+    // Check if there's already a fetch in progress for this package
+    if (_pendingFetches.containsKey(packageName)) {
+      return _pendingFetches[packageName]!;
+    }
+
+    // Start new fetch and track it
+    final future = _fetchAppInfo(packageName);
+    _pendingFetches[packageName] = future;
+    
+    try {
+      final result = await future;
+      return result;
+    } finally {
+      _pendingFetches.remove(packageName);
+    }
+  }
+
+  /// Internal method to fetch app info from system
+  Future<CachedAppInfo> _fetchAppInfo(String packageName) async {
     try {
       final app = await InstalledApps.getAppInfo(packageName, null);
       
-      if (app != null && app.icon != null && app.icon!.isNotEmpty) {
-        _iconCache[packageName] = app.icon;
-        return app.icon;
+      if (app != null) {
+        // Cache both icon and name
+        _iconCache[packageName] = (app.icon != null && app.icon!.isNotEmpty) ? app.icon : null;
+        _nameCache[packageName] = app.name;
+        
+        return CachedAppInfo(
+          icon: _iconCache[packageName],
+          name: _nameCache[packageName],
+        );
       } else {
         _iconCache[packageName] = null;
-        return null;
+        _nameCache[packageName] = null;
+        return const CachedAppInfo();
       }
     } catch (e) {
       _failedPackages.add(packageName);
       _iconCache[packageName] = null;
-      return null;
+      _nameCache[packageName] = null;
+      return const CachedAppInfo();
     }
   }
 
-  /// Get app name for a package
+  /// Get cached icon (legacy method for compatibility)
+  Future<Uint8List?> getIcon(String packageName) async {
+    final info = await getAppInfo(packageName);
+    return info.icon;
+  }
+
+  /// Get cached app name
   Future<String?> getAppName(String packageName) async {
-    try {
-      final app = await InstalledApps.getAppInfo(packageName, null);
-      return app?.name;
-    } catch (e) {
-      return null;
-    }
+    final info = await getAppInfo(packageName);
+    return info.name;
   }
 
-  /// Check if icon is already cached
+  /// Check if package info is cached
   bool isCached(String packageName) {
+    return _iconCache.containsKey(packageName) && _nameCache.containsKey(packageName);
+  }
+
+  /// Check if only icon is cached (for backwards compatibility)
+  bool isIconCached(String packageName) {
     return _iconCache.containsKey(packageName);
   }
 
-  /// Clear the cache (useful for memory management)
   void clearCache() {
     _iconCache.clear();
+    _nameCache.clear();
     _failedPackages.clear();
+    _pendingFetches.clear();
   }
 
-  /// Get cache size for debugging
   int get cacheSize => _iconCache.length;
 }
+
